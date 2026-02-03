@@ -1,5 +1,9 @@
+/* =========================
+   CONSTANTS & STORAGE
+========================= */
 const ADMIN_ID = "admin123";
 
+/* PRODUCTS */
 let products = JSON.parse(localStorage.getItem("products")) || [
   { id: 1, name: "Intel i5 CPU", price: 12000, cat: "CPU", img: "images/icpu.png" },
   { id: 2, name: "AMD Ryzen 5", price: 14000, cat: "CPU", img: "images/rcpu.png" },
@@ -11,149 +15,281 @@ let products = JSON.parse(localStorage.getItem("products")) || [
   { id: 8, name: "450W SMPS", price: 2800, cat: "Power Supply", img: "images/psu.png" }
 ];
 
+/* CART */
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
+/* SERVICE CONTACT */
+if (!localStorage.getItem("serviceContact")) {
+  localStorage.setItem("serviceContact", "+91 9XXXXXXXXX");
+}
+
+/* =========================
+   SAVE FUNCTIONS
+========================= */
 function saveProducts() {
   localStorage.setItem("products", JSON.stringify(products));
 }
 
-/* LOGIN */
+function saveCart() {
+  localStorage.setItem("cart", JSON.stringify(cart));
+}
+
+/* =========================
+   LOGIN
+========================= */
 function login() {
-  const id = document.getElementById("userid").value;
+  const id = document.getElementById("userid").value.trim();
+
   if (id === ADMIN_ID) {
-    localStorage.setItem("role","admin");
-    location.href="admin.html";
+    localStorage.setItem("role", "admin");
+    window.location.href = "admin.html";
   } else {
-    localStorage.setItem("role","user");
-    location.href="products.html";
+    localStorage.setItem("role", "user");
+    window.location.href = "products.html";
   }
 }
 
-/* PRODUCTS */
+/* =========================
+   PRODUCT CATEGORIES
+========================= */
 function loadCategories() {
-  const div=document.getElementById("categories");
-  if(!div) return;
-  [...new Set(products.map(p=>p.cat))].forEach(c=>{
-    div.innerHTML+=`<span class="category" onclick="showProducts('${c}')">${c}</span>`;
+  const div = document.getElementById("categories");
+  if (!div) return;
+
+  div.innerHTML = "";
+  const cats = [...new Set(products.map(p => p.cat))];
+
+  cats.forEach(c => {
+    const span = document.createElement("span");
+    span.className = "category";
+    span.innerText = c;
+    span.onclick = () => showProducts(c);
+    div.appendChild(span);
   });
 }
 
-function showProducts(cat=null) {
-  const list=document.getElementById("productList");
-  if(!list) return;
-  list.innerHTML="";
-  products.filter(p=>!cat||p.cat===cat).forEach(p=>{
-    list.innerHTML+=`
-    <div class="product">
-      <img src="${p.img}">
-      <h3>${p.name}</h3>
-      <p>₹${p.price}</p>
-      <button onclick="addToCart(${p.id})">Add to Cart</button>
-    </div>`;
-  });
+/* =========================
+   SHOW PRODUCTS
+========================= */
+function showProducts(filter = null) {
+  const list = document.getElementById("productList");
+  if (!list) return;
+
+  list.innerHTML = "";
+
+  products
+    .filter(p => !filter || p.cat === filter)
+    .forEach(p => {
+      const d = document.createElement("div");
+      d.className = "product";
+      d.innerHTML = `
+        <img src="${p.img}">
+        <h3>${p.name}</h3>
+        <p>₹${p.price}</p>
+        <button onclick="addToCart(${p.id})">Add to Cart</button>
+      `;
+      list.appendChild(d);
+    });
 }
 
-function sortProducts(type){
-  if(type==="low") products.sort((a,b)=>a.price-b.price);
-  if(type==="high") products.sort((a,b)=>b.price-a.price);
+/* =========================
+   SORT PRODUCTS
+========================= */
+function sortProducts(type) {
+  if (type === "low") products.sort((a, b) => a.price - b.price);
+  if (type === "high") products.sort((a, b) => b.price - a.price);
   showProducts();
 }
 
-/* CART */
-function addToCart(id){
-  cart.push(products.find(p=>p.id===id));
-  localStorage.setItem("cart",JSON.stringify(cart));
+/* =========================
+   CART FUNCTIONS
+========================= */
+function addToCart(id) {
+  const product = products.find(p => p.id === id);
+  if (!product) return;
+
+  cart.push(product);
+  saveCart();
   alert("Added to cart");
 }
 
-function loadCart(){
-  const div=document.getElementById("cartItems");
-  const t=document.getElementById("total");
-  if(!div) return;
-  let total=0;
-  div.innerHTML="";
-  cart.forEach(p=>{total+=p.price;div.innerHTML+=`<p>${p.name} - ₹${p.price}</p>`});
-  t.innerText="Total: ₹"+total;
+function loadCart() {
+  const div = document.getElementById("cartItems");
+  const totalEl = document.getElementById("total");
+  if (!div || !totalEl) return;
+
+  div.innerHTML = "";
+  let total = 0;
+
+  cart.forEach(p => {
+    total += p.price;
+    div.innerHTML += `<p>${p.name} - ₹${p.price}</p>`;
+  });
+
+  totalEl.innerText = "Total: ₹" + total;
 }
 
-/* ORDER */
-function placeOrder(){
-  localStorage.setItem("order",JSON.stringify(cart));
+/* =========================
+   ORDER
+========================= */
+function placeOrder() {
+  localStorage.setItem("order", JSON.stringify(cart));
   localStorage.removeItem("cart");
-  location.href="order.html";
+  cart = [];
+  window.location.href = "order.html";
 }
 
-function loadOrder(){
-  const d=document.getElementById("summary");
-  if(!d) return;
-  JSON.parse(localStorage.getItem("order")||"[]")
-    .forEach(p=>d.innerHTML+=`<p>${p.name} - ₹${p.price}</p>`);
+function loadOrder() {
+  const div = document.getElementById("summary");
+  if (!div) return;
+
+  const data = JSON.parse(localStorage.getItem("order")) || [];
+  div.innerHTML = "";
+
+  data.forEach(p => {
+    div.innerHTML += `<p>${p.name} - ₹${p.price}</p>`;
+  });
 }
 
-/* ADMIN */
-function addProduct(){
+/* =========================
+   ADMIN PRODUCT MANAGEMENT
+========================= */
+function addProduct() {
+  const name = pname.value.trim();
+  const cat = pcat.value.trim();
+  const price = Number(pprice.value);
+  const img = pimg.value.trim();
+
+  if (!name || !cat || !price || !img) {
+    alert("Fill all fields");
+    return;
+  }
+
   products.push({
-    id:Date.now(),
-    name:pname.value,
-    cat:pcat.value,
-    price:+pprice.value,
-    img:pimg.value
+    id: Date.now(),
+    name,
+    cat,
+    price,
+    img
   });
+
+  saveProducts();
+  loadAdminProducts();
+
+  pname.value = "";
+  pcat.value = "";
+  pprice.value = "";
+  pimg.value = "";
+}
+
+function deleteProduct(id) {
+  products = products.filter(p => p.id !== id);
   saveProducts();
   loadAdminProducts();
 }
 
-function deleteProduct(id){
-  products=products.filter(p=>p.id!==id);
-  saveProducts();
-  loadAdminProducts();
-}
+function loadAdminProducts() {
+  const div = document.getElementById("adminProductList");
+  if (!div) return;
 
-function loadAdminProducts(){
-  const d=document.getElementById("adminProductList");
-  if(!d) return;
-  d.innerHTML="";
-  products.forEach(p=>{
-    d.innerHTML+=`
-    <div class="product">
-      <img src="${p.img}" width="80"><br>
-      <input value="${p.name}" onchange="p.name=this.value;saveProducts()">
-      <input value="${p.cat}" onchange="p.cat=this.value;saveProducts()">
-      <input type="number" value="${p.price}" onchange="p.price=this.value;saveProducts()">
-      <button onclick="deleteProduct(${p.id})">Delete</button>
-    </div>`;
+  div.innerHTML = "";
+  products.forEach(p => {
+    div.innerHTML += `
+      <div class="product">
+        <img src="${p.img}" width="80"><br>
+        <input value="${p.name}" onchange="p.name=this.value;saveProducts()">
+        <input value="${p.cat}" onchange="p.cat=this.value;saveProducts()">
+        <input type="number" value="${p.price}" onchange="p.price=this.value;saveProducts()">
+        <button onclick="deleteProduct(${p.id})">Delete</button>
+      </div>
+    `;
   });
 }
 
-/* PC BUILDER */
-function loadBuilder(){
-  ["CPU","RAM","GPU","Storage"].forEach(t=>{
-    const s=document.getElementById(t.toLowerCase());
-    if(!s) return;
-    products.filter(p=>p.cat===t)
-      .forEach(p=>s.innerHTML+=`<option value="${p.id}">${p.name}</option>`);
+/* =========================
+   SERVICE CONTACT (ADMIN)
+========================= */
+function saveContact() {
+  const num = document.getElementById("contactInput").value.trim();
+  if (!num) {
+    alert("Enter valid contact number");
+    return;
+  }
+  localStorage.setItem("serviceContact", num);
+  alert("Contact number updated");
+}
+
+function loadContact() {
+  const el = document.getElementById("contactDisplay");
+  if (!el) return;
+  el.innerHTML = `<b>${localStorage.getItem("serviceContact")}</b>`;
+}
+
+/* =========================
+   PC BUILDER
+========================= */
+function loadBuilder() {
+  ["CPU", "RAM", "GPU", "Storage"].forEach(type => {
+    const sel = document.getElementById(type.toLowerCase());
+    if (!sel) return;
+
+    products
+      .filter(p => p.cat === type)
+      .forEach(p => {
+        sel.innerHTML += `<option value="${p.id}">${p.name}</option>`;
+      });
   });
 }
 
-function updateBuild(){
-  let total=0,ok=true;
-  ["cpu","ram","gpu","storage"].forEach(id=>{
-    const v=document.getElementById(id).value;
-    if(!v) ok=false;
-    const p=products.find(x=>x.id==v);
-    if(p) total+=p.price;
+function updateBuild() {
+  let total = 0;
+  let ready = true;
+
+  ["cpu", "ram", "gpu", "storage"].forEach(id => {
+    const val = document.getElementById(id).value;
+    if (!val) ready = false;
+    const prod = products.find(p => p.id == val);
+    if (prod) total += prod.price;
   });
-  buildPrice.innerText="Total: ₹"+total;
-  buildStatus.innerText=ok?"✅ Compatible Build":"⚠ Select all parts";
+
+  document.getElementById("buildPrice").innerText = "Total: ₹" + total;
+  document.getElementById("buildStatus").innerText =
+    ready ? "✅ Compatible Build" : "⚠ Select all components";
 }
 
-/* PAGE LOAD */
-const page=location.pathname;
-if(page.includes("products")){loadCategories();showProducts();}
-if(page.includes("cart")) loadCart();
-if(page.includes("order")) loadOrder();
-if(page.includes("admin")){
-  if(localStorage.getItem("role")!=="admin") location.href="index.html";
-  loadAdminProducts();
+/* =========================
+   PAGE-SPECIFIC EXECUTION
+========================= */
+const page = window.location.pathname;
+
+if (page.includes("products.html")) {
+  loadCategories();
+  showProducts();
 }
-if(page.includes("pc-builder")) loadBuilder();
+
+if (page.includes("cart.html")) {
+  loadCart();
+}
+
+if (page.includes("order.html")) {
+  loadOrder();
+}
+
+if (page.includes("admin.html")) {
+  if (localStorage.getItem("role") !== "admin") {
+    alert("Admin only!");
+    window.location.href = "index.html";
+  } else {
+    loadAdminProducts();
+    document.getElementById("contactInput").value =
+      localStorage.getItem("serviceContact");
+  }
+}
+
+if (page.includes("service.html")) {
+  loadContact();
+}
+
+if (page.includes("pc-builder.html")) {
+  loadBuilder();
+}
