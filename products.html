@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Products</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<h1>🖥 Computer Hardware Store</h1>
+
+<div id="categories"></div>
+
+<select onchange="sortProducts(this.value)">
+  <option value="">Sort By</option>
+  <option value="low">Price: Low → High</option>
+  <option value="high">Price: High → Low</option>
+</select>
+
+<div id="productList" class="product-grid"></div>
+
+<a href="pc-builder.html" class="cartLink">🛠 PC Builder</a>
+<a href="cart.html" class="cartLink">🛒 Go to Cart</a>
+<a href="service.html" class="serviceBtn">🧑‍💻 Online Service</a>
+<script src="js/script.js"></script>
+</body>
+</html>

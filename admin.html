@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Panel</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<h1>Admin Panel</h1>
+<p>Only admin can access this page.</p>
+
+<div class="card">
+  <input id="pname" placeholder="Product Name">
+  <input id="pcat" placeholder="Category (CPU, RAM, GPU...)">
+  <input id="pprice" placeholder="Price">
+  <input type="file" id="pimgfile" accept="image/*">
+  <button onclick="addProduct()">Add Product</button>
+</div>
+
+<h2>Product List</h2>
+<div id="adminProductList" class="product-grid"></div>
+
+<script src="js/script.js"></script>
+<a href="index.html" class="serviceBtn">login page</a>
+</body>
+</html>

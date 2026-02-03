@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PC Builder</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<h1>🛠 Build Your Dream PC</h1>
+
+<div class="card">
+  <select id="cpu" onchange="updateBuild()"><option>Select CPU</option></select>
+  <select id="ram" onchange="updateBuild()"><option>Select RAM</option></select>
+  <select id="gpu" onchange="updateBuild()"><option>Select GPU</option></select>
+  <select id="storage" onchange="updateBuild()"><option>Select Storage</option></select>
+
+  <h3 id="buildPrice">Total: ₹0</h3>
+  <p id="buildStatus"></p>
+</div>
+
+<script src="js/script.js"></script>
+<a href="products.html" class="cartLink">⬅ Back to Store</a>
+</body>
+</html>
