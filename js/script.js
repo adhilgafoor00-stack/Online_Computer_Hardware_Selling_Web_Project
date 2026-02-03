@@ -1,7 +1,8 @@
 /* =========================
    CONSTANTS & STORAGE
 ========================= */
-const ADMIN_ID = "admin123";
+const ADMIN_ID = "admin";
+const ADMIN_PASS = "admin@123";
 
 /* PRODUCTS */
 let products = JSON.parse(localStorage.getItem("products")) || [
@@ -39,13 +40,18 @@ function saveCart() {
 ========================= */
 function login() {
   const id = document.getElementById("userid").value.trim();
+  const pass = document.getElementById("password").value.trim();
 
-  if (id === ADMIN_ID) {
+  if (id === ADMIN_ID && pass === ADMIN_PASS) {
     localStorage.setItem("role", "admin");
     window.location.href = "admin.html";
-  } else {
+  } 
+  else if (id !== "" && pass !== "") {
     localStorage.setItem("role", "user");
     window.location.href = "products.html";
+  } 
+  else {
+    alert("Please enter login details");
   }
 }
 
