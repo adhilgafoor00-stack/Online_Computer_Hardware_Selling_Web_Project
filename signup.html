@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Sign Up</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<h1>Create an Account</h1>
+<div class="card">
+  <input id="signupUser" placeholder="Username">
+  <input id="signupPass" type="password" placeholder="Password">
+  <button onclick="signupUser()">Sign Up</button>
+</div>
+
+<script src="js/script.js"></script>
+<script>
+  // if already logged in redirect
+  const role = localStorage.getItem('role');
+  if (role) {
+    if (role === 'admin') window.location.href = 'admin.html';
+    else window.location.href = 'products.html';
+  }
+</script>
+
+<a href="index.html" class="serviceBtn">Back to login</a>
+</body>
+</html>

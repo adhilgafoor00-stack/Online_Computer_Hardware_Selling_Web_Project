@@ -1,0 +1,2 @@
+Flask==2.2.3
+# you'll also get sqlite3 via Python standard library

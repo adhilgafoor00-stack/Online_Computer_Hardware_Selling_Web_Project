@@ -20,6 +20,12 @@
 <h2>Product List</h2>
 <div id="adminProductList" class="product-grid"></div>
 
+<h2>Administration</h2>
+<p><a href="register.html" class="serviceBtn">Create user account</a></p>
+
+<h2>User Management</h2>
+<div id="userList" class="card"></div>
+
 <h2>Service Contact Settings</h2>
 
 <div class="card">
@@ -28,6 +34,12 @@
 </div>
 
 <script src="js/script.js"></script>
+<script>
+  // load user list when admin page opens
+  if (localStorage.getItem('role') === 'admin') {
+    loadUsers();
+  }
+</script>
 <a href="index.html" class="serviceBtn">login page</a>
 </body>
 </html>

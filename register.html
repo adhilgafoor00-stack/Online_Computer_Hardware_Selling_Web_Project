@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Register User</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<h1>Create New User Account</h1>
+<p>Only an administrator can use this page.</p>
+
+<div class="card">
+  <input id="newUser" placeholder="Username">
+  <input id="newPass" type="password" placeholder="Password">
+  <button onclick="registerUser()">Create Account</button>
+</div>
+
+<script src="js/script.js"></script>
+<script>
+  // redirect if not admin
+  if (localStorage.getItem('role') !== 'admin') {
+    alert('Admin only!');
+    window.location.href = 'index.html';
+  }
+</script>
+
+<a href="admin.html" class="serviceBtn">Back to Admin Panel</a>
+</body>
+</html>

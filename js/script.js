@@ -5,16 +5,20 @@ const ADMIN_ID = "admin";
 const ADMIN_PASS = "admin@123";
 
 /* PRODUCTS */
-let products = JSON.parse(localStorage.getItem("products")) || [
-  { id: 1, name: "Intel i5 CPU", price: 12000, cat: "CPU", img: "images/icpu.png" },
-  { id: 2, name: "AMD Ryzen 5", price: 14000, cat: "CPU", img: "images/rcpu.png" },
-  { id: 3, name: "8GB DDR4 RAM", price: 2500, cat: "RAM", img: "images/ram8.png" },
-  { id: 4, name: "16GB DDR4 RAM", price: 4800, cat: "RAM", img: "images/ram16.png" },
-  { id: 5, name: "512GB SSD", price: 4500, cat: "Storage", img: "images/ssd.png" },
-  { id: 6, name: "1TB HDD", price: 3500, cat: "Storage", img: "images/hdd.png" },
-  { id: 7, name: "NVIDIA GTX GPU", price: 22000, cat: "GPU", img: "images/gpu.png" },
-  { id: 8, name: "450W SMPS", price: 2800, cat: "Power Supply", img: "images/psu.png" }
-];
+let products = []; // will be loaded from backend
+
+async function fetchProducts() {
+  try {
+    const res = await fetch('/api/products');
+    if (res.ok) {
+      products = await res.json();
+    } else {
+      console.error('Failed to fetch products');
+    }
+  } catch (e) {
+    console.error('Error fetching products', e);
+  }
+}
 
 /* CART */
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
@@ -38,27 +42,44 @@ function saveCart() {
 /* =========================
    LOGIN
 ========================= */
-function login() {
+async function login() {
   const id = document.getElementById("userid").value.trim();
   const pass = document.getElementById("password").value.trim();
 
-  if (id === ADMIN_ID && pass === ADMIN_PASS) {
-    localStorage.setItem("role", "admin");
-    window.location.href = "admin.html";
-  } 
-  else if (id !== "" && pass !== "") {
-    localStorage.setItem("role", "user");
-    window.location.href = "products.html";
-  } 
-  else {
+  if (!id || !pass) {
     alert("Please enter login details");
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: id, password: pass })
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      localStorage.setItem("role", data.role);
+      if (data.role === 'admin') {
+        window.location.href = "admin.html";
+      } else {
+        window.location.href = "products.html";
+      }
+    } else {
+      const err = await res.json();
+      alert(err.error || 'Login failed');
+    }
+  } catch (e) {
+    alert('Network error: ' + e.message);
   }
 }
 
 /* =========================
    PRODUCT CATEGORIES
 ========================= */
-function loadCategories() {
+async function loadCategories() {
+  await fetchProducts();
   const div = document.getElementById("categories");
   if (!div) return;
 
@@ -160,7 +181,7 @@ function loadOrder() {
 /* =========================
    ADMIN PRODUCT MANAGEMENT
 ========================= */
-function addProduct() {
+async function addProduct() {
   const name = pname.value.trim();
   const cat = pcat.value.trim();
   const price = Number(pprice.value);
@@ -171,30 +192,30 @@ function addProduct() {
     return;
   }
 
-  products.push({
-    id: Date.now(),
-    name,
-    cat,
-    price,
-    img
+  const res = await fetch('/api/products', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, cat, price, img })
   });
-
-  saveProducts();
-  loadAdminProducts();
-
-  pname.value = "";
-  pcat.value = "";
-  pprice.value = "";
-  pimg.value = "";
+  if (res.ok) {
+    await loadAdminProducts();
+    pname.value = "";
+    pcat.value = "";
+    pprice.value = "";
+    pimg.value = "";
+  } else {
+    alert('Failed to add product');
+  }
 }
 
-function deleteProduct(id) {
+async function deleteProduct(id) {
+  // TODO: implement backend deletion endpoint
   products = products.filter(p => p.id !== id);
-  saveProducts();
-  loadAdminProducts();
+  await loadAdminProducts();
 }
 
-function loadAdminProducts() {
+async function loadAdminProducts() {
+  await fetchProducts();
   const div = document.getElementById("adminProductList");
   if (!div) return;
 
@@ -223,6 +244,86 @@ function saveContact() {
   }
   localStorage.setItem("serviceContact", num);
   alert("Contact number updated");
+}
+
+async function registerUser() {
+  const username = document.getElementById('newUser').value.trim();
+  const password = document.getElementById('newPass').value.trim();
+  if (!username || !password) {
+    alert('Enter username and password');
+    return;
+  }
+
+  const payload = { username, password, role: 'user' };
+  try {
+    const res = await fetch('/api/users', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Role': localStorage.getItem('role') || ''
+      },
+      body: JSON.stringify(payload)
+    });
+    if (res.ok) {
+      alert('User account created');
+      document.getElementById('newUser').value = '';
+      document.getElementById('newPass').value = '';
+    } else {
+      const err = await res.json();
+      alert(err.error || 'Failed to create user');
+    }
+  } catch (e) {
+    alert('Network error: ' + e.message);
+  }
+}
+
+async function signupUser() {
+  const username = document.getElementById('signupUser').value.trim();
+  const password = document.getElementById('signupPass').value.trim();
+  if (!username || !password) {
+    alert('Enter username and password');
+    return;
+  }
+  try {
+    const res = await fetch('/api/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    if (res.ok) {
+      alert('Account created! Please login.');
+      window.location.href = 'index.html';
+    } else {
+      const err = await res.json();
+      alert(err.error || 'Signup failed');
+    }
+  } catch (e) {
+    alert('Network error: ' + e.message);
+  }
+}
+
+// admin user management
+async function loadUsers() {
+  const res = await fetch('/api/users', {
+    headers: { 'X-Role': localStorage.getItem('role') || '' }
+  });
+  if (!res.ok) return;
+  const users = await res.json();
+  const div = document.getElementById('userList');
+  if (!div) return;
+  div.innerHTML = '';
+  users.forEach(u => {
+    div.innerHTML += `<p>${u.username} (${u.role}) ` +
+      `<button onclick="deleteUser(${u.id})">Delete</button></p>`;
+  });
+}
+
+async function deleteUser(id) {
+  const res = await fetch(`/api/users/${id}`, {
+    method: 'DELETE',
+    headers: { 'X-Role': localStorage.getItem('role') || '' }
+  });
+  if (res.ok) await loadUsers();
 }
 
 function loadContact() {
@@ -269,8 +370,10 @@ function updateBuild() {
 const page = window.location.pathname;
 
 if (page.includes("products.html")) {
-  loadCategories();
-  showProducts();
+  (async () => {
+    await loadCategories();
+    showProducts();
+  })();
 }
 
 if (page.includes("cart.html")) {
@@ -286,9 +389,11 @@ if (page.includes("admin.html")) {
     alert("Admin only!");
     window.location.href = "index.html";
   } else {
-    loadAdminProducts();
-    document.getElementById("contactInput").value =
-      localStorage.getItem("serviceContact");
+    (async () => {
+      await loadAdminProducts();
+      document.getElementById("contactInput").value =
+        localStorage.getItem("serviceContact");
+    })();
   }
 }
 
