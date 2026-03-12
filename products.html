@@ -1,26 +1,36 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Products</title>
+  <title>Hardware Catalog | Antigravity Hardware</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body class="fade-in">
 
-<h1>🖥 Computer Hardware Store</h1>
+<div style="max-width: 1200px; margin: 0 auto;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+    <h1 style="margin: 0; background: linear-gradient(to right, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Hardware Pro</h1>
+    <div style="display: flex; gap: 20px; align-items: center;">
+      <a href="cart.html" class="cartLink">🛒 My Cart</a>
+      <a href="index.html" class="cartLink">Logout</a>
+    </div>
+  </div>
 
-<div id="categories"></div>
+  <div class="card" style="padding: 20px;">
+    <div id="categories"></div>
+    <div style="display: flex; justify-content: center; gap: 15px; margin-top: 15px;">
+      <button onclick="sortProducts('low')" style="min-width: unset; font-size: 0.8rem; padding: 8px 15px;">Price: Low to High</button>
+      <button onclick="sortProducts('high')" style="min-width: unset; font-size: 0.8rem; padding: 8px 15px;">Price: High to Low</button>
+    </div>
+  </div>
 
-<select onchange="sortProducts(this.value)">
-  <option value="">Sort By</option>
-  <option value="low">Price: Low → High</option>
-  <option value="high">Price: High → Low</option>
-</select>
+  <div id="productList" class="product-grid"></div>
 
-<div id="productList" class="product-grid"></div>
+  <div style="text-align: center; margin-top: 50px;">
+    <a href="pc-builder.html" class="serviceBtn">Launch PC Builder</a>
+    <a href="service.html" class="serviceBtn" style="background: var(--glass); border: 1px solid var(--glass-border); color: var(--text-main);">Customer Support</a>
+  </div>
+</div>
 
-<a href="pc-builder.html" class="cartLink">🛠 PC Builder</a>
-<a href="cart.html" class="cartLink">🛒 Go to Cart</a>
-<a href="service.html" class="serviceBtn">🧑‍💻 Online Service</a>
 <script src="js/script.js"></script>
 </body>
 </html>

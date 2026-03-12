@@ -1,17 +1,26 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Order Summary</title>
+  <title>Order Confirmed | Antigravity Hardware</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body class="center">
 
-<h1>Order Placed Successfully ✅</h1>
-<p>Thank you for your purchase.</p>
+<div class="card" style="width: 100%; max-width: 500px; text-align: center;">
+  <h1 style="color: var(--secondary);">Order Placed!</h1>
+  <p style="color: var(--text-muted); margin-bottom: 30px;">Thank you for choosing Antigravity Hardware.</p>
+  
+  <div class="card" style="background: rgba(0,0,0,0.2); text-align: left; margin: 20px 0;">
+    <h3>Summary</h3>
+    <div id="summary"></div>
+  </div>
 
-<div id="summary"></div>
+  <button onclick="window.location.href='products.html'" style="margin-top: 20px;">Done</button>
+</div>
 
 <script src="js/script.js"></script>
-<a href="products.html" class="cartLink">⬅ Back to Store</a>
+<script>
+  loadOrder();
+</script>
 </body>
 </html>

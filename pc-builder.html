@@ -1,24 +1,51 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>PC Builder</title>
+  <title>Build Your PC | Antigravity Hardware</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body class="fade-in">
 
-<h1>🛠 Build Your Dream PC</h1>
+<div style="max-width: 800px; margin: 0 auto;">
+  <h1>PC Custom Builder</h1>
+  
+  <div class="card">
+    <p style="color: var(--text-muted); text-align: center; margin-bottom: 30px;">Select your components to see compatibility and total price.</p>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+      <div>
+        <label>CPU</label>
+        <select id="cpu" onchange="updateBuild()"><option value="">Select CPU</option></select>
+      </div>
+      <div>
+        <label>RAM</label>
+        <select id="ram" onchange="updateBuild()"><option value="">Select RAM</option></select>
+      </div>
+      <div>
+        <label>GPU</label>
+        <select id="gpu" onchange="updateBuild()"><option value="">Select GPU</option></select>
+      </div>
+      <div>
+        <label>Storage</label>
+        <select id="storage" onchange="updateBuild()"><option value="">Select Storage</option></select>
+      </div>
+    </div>
 
-<div class="card">
-  <select id="cpu" onchange="updateBuild()"><option>Select CPU</option></select>
-  <select id="ram" onchange="updateBuild()"><option>Select RAM</option></select>
-  <select id="gpu" onchange="updateBuild()"><option>Select GPU</option></select>
-  <select id="storage" onchange="updateBuild()"><option>Select Storage</option></select>
+    <div class="card" style="background: rgba(0,0,0,0.2); margin-top: 30px; text-align: center;">
+      <h2 id="buildStatus" style="color: var(--secondary); margin-bottom: 10px;">Select components</h2>
+      <h1 id="buildPrice" style="margin: 0;">Total: ₹0</h1>
+    </div>
 
-  <h3 id="buildPrice">Total: ₹0</h3>
-  <p id="buildStatus"></p>
+    <button onclick="window.location.href='products.html'" style="margin-top: 20px; background: var(--glass); border: 1px solid var(--glass-border); color: var(--text-main);">Back to Components</button>
+  </div>
 </div>
 
 <script src="js/script.js"></script>
-<a href="products.html" class="cartLink">⬅ Back to Store</a>
+<script>
+  (async () => {
+    await fetchProducts();
+    loadBuilder();
+  })();
+</script>
 </body>
 </html>

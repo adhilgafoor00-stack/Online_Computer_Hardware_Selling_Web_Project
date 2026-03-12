@@ -1,18 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Register User</title>
+  <title> Registration | Antigravity Hardware</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body class="center">
 
-<h1>Create New User Account</h1>
-<p>Only an administrator can use this page.</p>
-
-<div class="card">
-  <input id="newUser" placeholder="Username">
-  <input id="newPass" type="password" placeholder="Password">
-  <button onclick="registerUser()">Create Account</button>
+<div class="card login-card">
+  <h1>New USER</h1>
+  <p style="text-align: center; color: var(--text-muted); margin-top: -30px; margin-bottom: 30px;">Authorized Access Only</p>
+  <input id="newUser" placeholder="Staff Username">
+  <input id="newPass" type="password" placeholder="Temporary Password">
+  <button onclick="registerUser()">Create Staff Account</button>
+  <div style="margin-top: 20px; text-align: center;">
+    <a href="index.html" class="cartLink">Loging Page</a>
+  </div>
 </div>
 
 <script src="js/script.js"></script>
@@ -23,7 +25,5 @@
     window.location.href = 'index.html';
   }
 </script>
-
-<a href="admin.html" class="serviceBtn">Back to Admin Panel</a>
 </body>
 </html>

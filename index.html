@@ -1,17 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Login | Hardware Store</title>
+  <title>Login | Antigravity Hardware</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="center">
 
-<div class="card">
-  <h2>Login</h2>
+<div class="card login-card">
+  <h1>Hardware Pro</h1>
+  <p style="text-align: center; color: var(--text-muted); margin-top: -30px; margin-bottom: 30px;">Premium Computer Hardware</p>
+  <h2>Welcome Back</h2>
   <input id="userid" placeholder="Enter Login ID">
   <input id="password" type="password" placeholder="Enter Password">
-  <button onclick="login()">Login</button>
-  <button onclick="window.location.href='signup.html'">Sign Up</button>
+  <button onclick="login()">Sign In</button>
+  <div style="margin-top: 20px; text-align: center;">
+    <p style="font-size: 0.9rem; color: var(--text-muted);">Don't have an account?</p>
+    <a href="register.html" class="cartLink">Create an Account</a>
+  </div>
 </div>
 
 <script src="js/script.js"></script>

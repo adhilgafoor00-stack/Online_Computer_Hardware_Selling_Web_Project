@@ -1,18 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Cart</title>
+  <title>Your Cart | Antigravity Hardware</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body class="fade-in">
 
-<h1>Your Cart</h1>
-<div id="cartItems"></div>
-
-<h3 id="total"></h3>
-<button onclick="placeOrder()">Place Order</button>
+<div style="max-width: 600px; margin: 0 auto;">
+  <h1>Review Your Cart</h1>
+  <div id="cartItems" class="card"></div>
+  <h2 id="total" style="text-align: right; margin-top: 20px;">Total: ₹0</h2>
+  
+  <div style="display: flex; gap: 15px; margin-top: 30px;">
+    <button onclick="placeOrder()" style="flex: 2;">Place Order Now</button>
+    <button onclick="window.location.href='products.html'" style="flex: 1; background: var(--glass); border: 1px solid var(--glass-border); color: var(--text-main);">Continue Shopping</button>
+  </div>
+</div>
 
 <script src="js/script.js"></script>
-<a href="products.html" class="cartLink">⬅ Back to Store</a>
 </body>
 </html>

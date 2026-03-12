@@ -182,36 +182,92 @@ function loadOrder() {
    ADMIN PRODUCT MANAGEMENT
 ========================= */
 async function addProduct() {
-  const name = pname.value.trim();
-  const cat = pcat.value.trim();
-  const price = Number(pprice.value);
-  const img = pimg.value.trim();
+  const nameEl = document.getElementById("pname");
+  const catEl = document.getElementById("pcat");
+  const priceEl = document.getElementById("pprice");
+  const imgEl = document.getElementById("pimg");
 
-  if (!name || !cat || !price || !img) {
-    alert("Fill all fields");
+  const name = nameEl.value.trim();
+  const cat = catEl.value.trim();
+  const price = Number(priceEl.value);
+  
+  if (!name || !cat || !price) {
+    alert("Fill all required fields");
     return;
   }
 
-  const res = await fetch('/api/products', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, cat, price, img })
-  });
-  if (res.ok) {
-    await loadAdminProducts();
-    pname.value = "";
-    pcat.value = "";
-    pprice.value = "";
-    pimg.value = "";
-  } else {
-    alert('Failed to add product');
+  let imgData = "images/default.png"; // fallback
+
+  if (imgEl.files && imgEl.files[0]) {
+    const reader = new FileReader();
+    imgData = await new Promise((resolve) => {
+      reader.onload = (e) => resolve(e.target.result);
+      reader.readAsDataURL(imgEl.files[0]);
+    });
+  }
+
+  try {
+    const res = await fetch('/api/products', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'X-Role': localStorage.getItem('role') || ''
+      },
+      body: JSON.stringify({ name, cat, price, img: imgData })
+    });
+    
+    if (res.ok) {
+      alert("Product added successfully!");
+      await loadAdminProducts();
+      nameEl.value = "";
+      catEl.value = "";
+      priceEl.value = "";
+      imgEl.value = "";
+    } else {
+      const err = await res.json();
+      alert('Failed to add product: ' + (err.error || 'Unknown error'));
+    }
+  } catch (e) {
+    alert('Error adding product: ' + e.message);
   }
 }
 
 async function deleteProduct(id) {
-  // TODO: implement backend deletion endpoint
-  products = products.filter(p => p.id !== id);
-  await loadAdminProducts();
+  if (!confirm("Delete this product?")) return;
+  const res = await fetch(`/api/products/${id}`, {
+    method: 'DELETE',
+    headers: { 'X-Role': localStorage.getItem('role') || '' }
+  });
+  if (res.ok) {
+    alert("Deleted");
+    await loadAdminProducts();
+  } else {
+    alert("Failed to delete");
+  }
+}
+
+async function updateProduct(id, btn) {
+  const card = btn.parentElement;
+  const name = card.querySelector(".edit-name").value.trim();
+  const cat = card.querySelector(".edit-cat").value.trim();
+  const price = Number(card.querySelector(".edit-price").value);
+  const imgData = card.dataset.img; // keep original img unless we add image editing later
+
+  const res = await fetch(`/api/products/${id}`, {
+    method: 'PUT',
+    headers: { 
+      'Content-Type': 'application/json',
+      'X-Role': localStorage.getItem('role') || '' 
+    },
+    body: JSON.stringify({ name, cat, price, img: imgData })
+  });
+
+  if (res.ok) {
+    alert("Updated successfully");
+    await loadAdminProducts();
+  } else {
+    alert("Failed to update");
+  }
 }
 
 async function loadAdminProducts() {
@@ -221,15 +277,20 @@ async function loadAdminProducts() {
 
   div.innerHTML = "";
   products.forEach(p => {
-    div.innerHTML += `
-      <div class="product">
-        <img src="${p.img}" width="80"><br>
-        <input value="${p.name}" onchange="p.name=this.value;saveProducts()">
-        <input value="${p.cat}" onchange="p.cat=this.value;saveProducts()">
-        <input type="number" value="${p.price}" onchange="p.price=this.value;saveProducts()">
-        <button onclick="deleteProduct(${p.id})">Delete</button>
+    const d = document.createElement("div");
+    d.className = "product-card-admin card";
+    d.dataset.img = p.img;
+    d.innerHTML = `
+      <img src="${p.img}" width="80"><br>
+      <input class="edit-name" value="${p.name}" placeholder="Name">
+      <input class="edit-cat" value="${p.cat}" placeholder="Category">
+      <input class="edit-price" type="number" value="${p.price}" placeholder="Price">
+      <div class="admin-actions">
+        <button onclick="updateProduct(${p.id}, this)">Save</button>
+        <button class="delete-btn" onclick="deleteProduct(${p.id})">Delete</button>
       </div>
     `;
+    div.appendChild(d);
   });
 }
 
@@ -391,6 +452,7 @@ if (page.includes("admin.html")) {
   } else {
     (async () => {
       await loadAdminProducts();
+      await loadUsers();
       document.getElementById("contactInput").value =
         localStorage.getItem("serviceContact");
     })();

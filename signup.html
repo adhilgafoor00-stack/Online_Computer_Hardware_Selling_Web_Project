@@ -1,16 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Sign Up</title>
+  <title>Sign Up | Antigravity Hardware</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body class="center">
 
-<h1>Create an Account</h1>
-<div class="card">
-  <input id="signupUser" placeholder="Username">
-  <input id="signupPass" type="password" placeholder="Password">
-  <button onclick="signupUser()">Sign Up</button>
+<div class="card login-card">
+  <h1>Join Us</h1>
+  <p style="text-align: center; color: var(--text-muted); margin-top: -30px; margin-bottom: 30px;">Start your hardware journey today</p>
+  <input id="signupUser" placeholder="Create Username">
+  <input id="signupPass" type="password" placeholder="Create Password">
+  <button onclick="signupUser()">Create Account</button>
+  <div style="margin-top: 20px; text-align: center;">
+    <p style="font-size: 0.9rem; color: var(--text-muted);">Already have an account?</p>
+    <a href="index.html" class="cartLink">Sign In Instead</a>
+  </div>
 </div>
 
 <script src="js/script.js"></script>

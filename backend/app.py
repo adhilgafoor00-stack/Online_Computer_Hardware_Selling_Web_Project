@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, send_from_directory
 import sqlite3
 import json
 from pathlib import Path
+from werkzeug.security import generate_password_hash, check_password_hash
 
 # serve the existing static html/js/css by pointing Flask at the parent directory
 app = Flask(__name__, static_folder='../', static_url_path='')
@@ -45,10 +46,10 @@ def init_db():
     # ensure there is an admin user
     cur.execute('SELECT COUNT(*) FROM users WHERE username = ?', ('admin',))
     if cur.fetchone()[0] == 0:
-        # password is hard‑coded for demo; in production hash it!
+        hashed_pass = generate_password_hash('admin@123')
         cur.execute(
             'INSERT INTO users (username, password, role) VALUES (?, ?, ?)',
-            ('admin', 'admin@123', 'admin'),
+            ('admin', hashed_pass, 'admin'),
         )
     # seed some default products if the table is empty
     cur.execute('SELECT COUNT(*) FROM products')
@@ -71,10 +72,14 @@ def init_db():
     conn.close()
 
 
+def is_admin():
+    return request.headers.get('X-Role') == 'admin'
+
+
 @app.route('/')
 def index():
-    # send index.html from parent directory
     return send_from_directory(app.static_folder, 'index.html')
+
 
 @app.route('/api/products', methods=['GET'])
 def get_products():
@@ -89,6 +94,8 @@ def get_products():
 
 @app.route('/api/products', methods=['POST'])
 def add_product():
+    if not is_admin():
+        return jsonify({'error': 'forbidden'}), 403
     data = request.get_json() or {}
     name = data.get('name')
     cat = data.get('cat')
@@ -108,19 +115,54 @@ def add_product():
     return jsonify({'id': product_id}), 201
 
 
+@app.route('/api/products/<int:product_id>', methods=['PUT'])
+def update_product(product_id):
+    if not is_admin():
+        return jsonify({'error': 'forbidden'}), 403
+    data = request.get_json() or {}
+    name = data.get('name')
+    cat = data.get('cat')
+    price = data.get('price')
+    img = data.get('img')
+    
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute(
+        'UPDATE products SET name=?, cat=?, price=?, img=? WHERE id=?',
+        (name, cat, price, img, product_id)
+    )
+    conn.commit()
+    conn.close()
+    return jsonify({'status': 'ok'})
+
+
+@app.route('/api/products/<int:product_id>', methods=['DELETE'])
+def delete_product_endpoint(product_id):
+    if not is_admin():
+        return jsonify({'error': 'forbidden'}), 403
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute('DELETE FROM products WHERE id = ?', (product_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({'status': 'ok'})
+
+
 @app.route('/api/signup', methods=['POST'])
 def signup_api():
     data = request.get_json() or {}
-    username = data.get('username','').strip()
-    password = data.get('password','').strip()
+    username = data.get('username', '').strip()
+    password = data.get('password', '').strip()
     if not username or not password:
         return jsonify({'error': 'username and password required'}), 400
+    
+    hashed_pass = generate_password_hash(password)
     conn = get_db()
     cur = conn.cursor()
     try:
         cur.execute(
             'INSERT INTO users (username, password, role) VALUES (?, ?, ?)',
-            (username, password, 'user'),
+            (username, hashed_pass, 'user'),
         )
         conn.commit()
         user_id = cur.lastrowid
@@ -133,8 +175,7 @@ def signup_api():
 
 @app.route('/api/users', methods=['POST'])
 def create_user():
-    # admin-only creation
-    if request.headers.get('X-Role') != 'admin':
+    if not is_admin():
         return jsonify({'error': 'forbidden'}), 403
     data = request.get_json() or {}
     username = data.get('username', '').strip()
@@ -142,6 +183,8 @@ def create_user():
     role = data.get('role', 'user').strip()
     if not username or not password:
         return jsonify({'error': 'username and password required'}), 400
+    
+    hashed_pass = generate_password_hash(password)
     if role not in ('admin', 'user'):
         role = 'user'
     conn = get_db()
@@ -149,7 +192,7 @@ def create_user():
     try:
         cur.execute(
             'INSERT INTO users (username, password, role) VALUES (?, ?, ?)',
-            (username, password, role),
+            (username, hashed_pass, role),
         )
         conn.commit()
         user_id = cur.lastrowid
@@ -162,7 +205,7 @@ def create_user():
 
 @app.route('/api/users', methods=['GET'])
 def list_users():
-    if request.headers.get('X-Role') != 'admin':
+    if not is_admin():
         return jsonify({'error': 'forbidden'}), 403
     conn = get_db()
     cur = conn.cursor()
@@ -174,7 +217,7 @@ def list_users():
 
 @app.route('/api/users/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
-    if request.headers.get('X-Role') != 'admin':
+    if not is_admin():
         return jsonify({'error': 'forbidden'}), 403
     conn = get_db()
     cur = conn.cursor()
@@ -191,12 +234,14 @@ def login_api():
     password = data.get('password', '').strip()
     if not username or not password:
         return jsonify({'error': 'username and password required'}), 400
+    
     conn = get_db()
     cur = conn.cursor()
-    cur.execute('SELECT role FROM users WHERE username = ? AND password = ?', (username, password))
+    cur.execute('SELECT password, role FROM users WHERE username = ?', (username,))
     row = cur.fetchone()
     conn.close()
-    if row:
+    
+    if row and check_password_hash(row['password'], password):
         return jsonify({'role': row['role']})
     else:
         return jsonify({'error': 'invalid credentials'}), 401

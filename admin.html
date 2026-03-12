@@ -1,45 +1,51 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Admin Panel</title>
+  <title>Admin Dashboard | Antigravity Hardware</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body class="fade-in">
 
-<h1>Admin Panel</h1>
-<p>Only admin can access this page.</p>
+<div style="max-width: 1000px; margin: 0 auto;">
+  <h1>Admin Dashboard</h1>
+  
+  <div class="card">
+    <h3>Add New Product</h3>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+      <input id="pname" placeholder="Product Name">
+      <input id="pcat" placeholder="Category (e.g. CPU, RAM)">
+      <input id="pprice" type="number" placeholder="Price (₹)">
+      <div style="display: flex; flex-direction: column; justify-content: center;">
+        <label style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px;">Product Image</label>
+        <input type="file" id="pimg" accept="image/*" style="padding: 8px;">
+      </div>
+    </div>
+    <button onclick="addProduct()" style="margin-top: 20px;">Add Product to Inventory</button>
+  </div>
 
-<div class="card">
-  <input id="pname" placeholder="Product Name">
-  <input id="pcat" placeholder="Category (CPU, RAM, GPU...)">
-  <input id="pprice" placeholder="Price">
-  <input type="file" id="pimgfile" accept="image/*">
-  <button onclick="addProduct()">Add Product</button>
-</div>
+  <h2>Catalog Management</h2>
+  <div id="adminProductList" class="product-grid"></div>
 
-<h2>Product List</h2>
-<div id="adminProductList" class="product-grid"></div>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 50px;">
+    <div class="card" style="margin: 0;">
+      <h3>Quick Actions</h3>
+      <a href="register.html" class="serviceBtn" style="width: 100%; margin-bottom: 10px;">Create Staff Account</a>
+      <a href="products.html" class="serviceBtn" style="width: 100%; margin-bottom: 10px;">View Storefront</a>
+      <a href="index.html" class="cartLink" style="display: block; text-align: center; margin-top: 10px;">Sign Out</a>
+    </div>
 
-<h2>Administration</h2>
-<p><a href="register.html" class="serviceBtn">Create user account</a></p>
+    <div class="card" style="margin: 0;">
+      <h3>Support Settings</h3>
+      <input id="contactInput" placeholder="Support Contact Number">
+      <button onclick="saveContact()">Update Contact Info</button>
+    </div>
+  </div>
 
-<h2>User Management</h2>
-<div id="userList" class="card"></div>
+  <h2 style="margin-top: 50px;">User Access Control</h2>
+  <div id="userList"></div>
 
-<h2>Service Contact Settings</h2>
-
-<div class="card">
-  <input id="contactInput" placeholder="Enter Support Contact Number">
-  <button onclick="saveContact()">Save Contact</button>
 </div>
 
 <script src="js/script.js"></script>
-<script>
-  // load user list when admin page opens
-  if (localStorage.getItem('role') === 'admin') {
-    loadUsers();
-  }
-</script>
-<a href="index.html" class="serviceBtn">login page</a>
 </body>
 </html>
